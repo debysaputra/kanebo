@@ -39,8 +39,9 @@ export async function GET() {
     const users = await User.find({}).sort({ createdAt: -1 }).lean()
     return NextResponse.json({ users })
   } catch (error) {
-    console.error("Admin get users error:", error)
-    return NextResponse.json({ error: "Terjadi kesalahan server" }, { status: 500 })
+    const message = error instanceof Error ? error.message : String(error)
+    console.error("Admin get users error:", message)
+    return NextResponse.json({ error: `Terjadi kesalahan: ${message}` }, { status: 500 })
   }
 }
 
@@ -83,7 +84,8 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
-    console.error("Admin create user error:", error)
-    return NextResponse.json({ error: "Terjadi kesalahan server" }, { status: 500 })
+    const message = error instanceof Error ? error.message : String(error)
+    console.error("Admin create user error:", message)
+    return NextResponse.json({ error: `Terjadi kesalahan: ${message}` }, { status: 500 })
   }
 }

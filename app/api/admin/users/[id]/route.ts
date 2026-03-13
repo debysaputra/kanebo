@@ -71,8 +71,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ message: "User berhasil diupdate" })
   } catch (error) {
-    console.error("Admin update user error:", error)
-    return NextResponse.json({ error: "Terjadi kesalahan server" }, { status: 500 })
+    const message = error instanceof Error ? error.message : String(error)
+    console.error("Admin update user error:", message)
+    return NextResponse.json({ error: `Terjadi kesalahan: ${message}` }, { status: 500 })
   }
 }
 
@@ -98,7 +99,8 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     await User.findByIdAndDelete(id)
     return NextResponse.json({ message: "User berhasil dihapus" })
   } catch (error) {
-    console.error("Admin delete user error:", error)
-    return NextResponse.json({ error: "Terjadi kesalahan server" }, { status: 500 })
+    const message = error instanceof Error ? error.message : String(error)
+    console.error("Admin delete user error:", message)
+    return NextResponse.json({ error: `Terjadi kesalahan: ${message}` }, { status: 500 })
   }
 }
