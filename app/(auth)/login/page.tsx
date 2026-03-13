@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { Eye, EyeOff, LogIn, Loader2 } from "lucide-react"
+import { Eye, EyeOff, LogIn, Loader2, Sparkles } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [demoLoading, setDemoLoading] = useState(false)
   const [error, setError] = useState("")
 
   const handleLogin = async (loginUsername: string, loginPassword: string) => {
@@ -40,7 +41,32 @@ export default function LoginPage() {
     await handleLogin(username, password)
   }
 
-  const handleDemo = () => handleLogin("demo", "demo123")
+  const handleDemo = async () => {
+    setDemoLoading(true)
+    setError("")
+    try {
+      // Reset & isi ulang data demo
+      await fetch("/api/demo/reset", { method: "POST" })
+      // Login sebagai demo
+      const result = await signIn("credentials", {
+        username: "demo",
+        password: "demo123",
+        redirect: false,
+      })
+      if (result?.error) {
+        setError("Gagal masuk ke akun demo. Coba lagi.")
+      } else {
+        router.push("/")
+        router.refresh()
+      }
+    } catch {
+      setError("Terjadi kesalahan. Coba lagi.")
+    } finally {
+      setDemoLoading(false)
+    }
+  }
+
+  const isAnyLoading = loading || demoLoading
 
   return (
     <div>
@@ -91,8 +117,8 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2"
+          disabled={isAnyLoading}
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
@@ -108,7 +134,8 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="relative my-6">
+      {/* Divider */}
+      <div className="relative my-5">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-200" />
         </div>
@@ -117,18 +144,48 @@ export default function LoginPage() {
         </div>
       </div>
 
+      {/* Demo button */}
       <button
         type="button"
         onClick={handleDemo}
-        disabled={loading}
-        className="w-full border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 disabled:opacity-60 text-blue-600 font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2 text-sm"
+        disabled={isAnyLoading}
+        className="w-full relative overflow-hidden rounded-xl py-4 px-5 transition disabled:opacity-60
+          bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-600 hover:to-indigo-600
+          text-white shadow-lg shadow-indigo-200 hover:shadow-indigo-300"
       >
-        <span className="text-base">🚀</span>
-        Masuk sebagai Demo
+        <div className="flex items-center justify-center gap-3">
+          {demoLoading ? (
+            <>
+              <Loader2 size={20} className="animate-spin flex-shrink-0" />
+              <div className="text-left">
+                <p className="font-semibold text-sm leading-none mb-0.5">Menyiapkan data demo...</p>
+                <p className="text-xs text-indigo-200">Mohon tunggu sebentar</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <Sparkles size={22} className="flex-shrink-0" />
+              <div className="text-left">
+                <p className="font-semibold text-sm leading-none mb-0.5">Coba Akun Demo</p>
+                <p className="text-xs text-indigo-200">Lengkap dengan data transaksi, anggaran & tujuan</p>
+              </div>
+            </>
+          )}
+        </div>
       </button>
-      <p className="text-center text-xs text-gray-400 mt-2">
-        username: demo · password: demo123
-      </p>
+
+      {/* Demo info card */}
+      <div className="mt-3 bg-indigo-50 border border-indigo-100 rounded-xl p-3">
+        <p className="text-xs font-semibold text-indigo-700 mb-2">Yang tersedia di akun demo:</p>
+        <div className="grid grid-cols-2 gap-1.5 text-xs text-indigo-600">
+          <span className="flex items-center gap-1.5"><span>💰</span> 3 akun keuangan</span>
+          <span className="flex items-center gap-1.5"><span>📊</span> Riwayat 3 bulan</span>
+          <span className="flex items-center gap-1.5"><span>📋</span> Anggaran bulanan</span>
+          <span className="flex items-center gap-1.5"><span>🎯</span> Tujuan keuangan</span>
+          <span className="flex items-center gap-1.5"><span>🤝</span> Catatan hutang</span>
+          <span className="flex items-center gap-1.5"><span>🔄</span> Reset otomatis</span>
+        </div>
+      </div>
 
       <p className="text-center text-xs text-gray-400 mt-5">
         Akun hanya bisa dibuat oleh admin.
