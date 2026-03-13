@@ -51,7 +51,7 @@ export default function CategoriesPage() {
     try {
       const res = await fetch("/api/categories")
       const data = await res.json()
-      setCategories(data)
+      setCategories(Array.isArray(data) ? data : [])
     } finally {
       setLoading(false)
     }

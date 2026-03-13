@@ -63,7 +63,7 @@ export default function GoalsPage() {
     try {
       const res = await fetch("/api/goals")
       const data = await res.json()
-      setGoals(data)
+      setGoals(Array.isArray(data) ? data : [])
     } finally {
       setLoading(false)
     }

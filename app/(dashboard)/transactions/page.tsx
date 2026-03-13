@@ -114,8 +114,8 @@ export default function TransactionsPage() {
   }, [fetchTransactions])
 
   useEffect(() => {
-    fetch("/api/accounts").then((r) => r.json()).then(setAccounts)
-    fetch("/api/categories").then((r) => r.json()).then(setCategories)
+    fetch("/api/accounts").then((r) => r.json()).then((d) => setAccounts(Array.isArray(d) ? d : []))
+    fetch("/api/categories").then((r) => r.json()).then((d) => setCategories(Array.isArray(d) ? d : []))
   }, [])
 
   const filteredCategories = categories.filter(

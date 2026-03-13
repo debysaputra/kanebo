@@ -65,7 +65,9 @@ export default function BudgetsPage() {
   }, [selectedMonth, selectedYear])
 
   useEffect(() => {
-    fetch("/api/categories?type=expense").then((r) => r.json()).then(setCategories)
+    fetch("/api/categories?type=expense")
+      .then((r) => r.json())
+      .then((data) => setCategories(Array.isArray(data) ? data : []))
   }, [])
 
   async function fetchBudgets() {
@@ -73,7 +75,7 @@ export default function BudgetsPage() {
     try {
       const res = await fetch(`/api/budgets?month=${selectedMonth}&year=${selectedYear}`)
       const data = await res.json()
-      setBudgets(data)
+      setBudgets(Array.isArray(data) ? data : [])
     } finally {
       setLoading(false)
     }
