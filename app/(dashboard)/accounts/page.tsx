@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Plus, Edit2, Trash2, Wallet, Loader2, CreditCard, Smartphone, Banknote } from "lucide-react"
 import Modal from "@/components/Modal"
 import { useToast } from "@/components/Toast"
+import { useConfirm } from "@/components/ConfirmDialog"
 
 interface Account {
   _id: string
@@ -61,6 +62,7 @@ export default function AccountsPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const { toast } = useToast()
+  const { confirm } = useConfirm()
 
   useEffect(() => {
     fetchAccounts()
@@ -142,7 +144,8 @@ export default function AccountsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Hapus akun ini?")) return
+    const ok = await confirm({ title: "Hapus Akun", message: "Akun ini akan dihapus permanen. Lanjutkan?", confirmText: "Hapus" })
+    if (!ok) return
     setDeleting(id)
     try {
       await fetch(`/api/accounts/${id}`, { method: "DELETE" })

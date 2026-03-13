@@ -7,6 +7,7 @@ import {
 } from "lucide-react"
 import Modal from "@/components/Modal"
 import { useToast } from "@/components/Toast"
+import { useConfirm } from "@/components/ConfirmDialog"
 import { format, differenceInDays } from "date-fns"
 import { id as idLocale } from "date-fns/locale"
 
@@ -65,6 +66,7 @@ export default function DebtsPage() {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [error, setError] = useState("")
   const { toast } = useToast()
+  const { confirm } = useConfirm()
 
   useEffect(() => {
     fetchDebts()
@@ -205,7 +207,8 @@ export default function DebtsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Hapus data ini?")) return
+    const ok = await confirm({ title: "Hapus Catatan", message: "Catatan hutang/piutang ini akan dihapus permanen. Lanjutkan?", confirmText: "Hapus" })
+    if (!ok) return
     setDeleting(id)
     try {
       await fetch(`/api/debts/${id}`, { method: "DELETE" })

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Plus, Edit2, Trash2, TrendingUp, Loader2, CheckCircle, Clock } from "lucide-react"
 import Modal from "@/components/Modal"
 import { useToast } from "@/components/Toast"
+import { useConfirm } from "@/components/ConfirmDialog"
 import { format, differenceInDays } from "date-fns"
 import { id as idLocale } from "date-fns/locale"
 
@@ -56,6 +57,7 @@ export default function GoalsPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const { toast } = useToast()
+  const { confirm } = useConfirm()
 
   useEffect(() => {
     fetchGoals()
@@ -184,7 +186,8 @@ export default function GoalsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Hapus tujuan ini?")) return
+    const ok = await confirm({ title: "Hapus Tujuan", message: "Tujuan keuangan ini akan dihapus permanen. Lanjutkan?", confirmText: "Hapus" })
+    if (!ok) return
     setDeleting(id)
     try {
       await fetch(`/api/goals/${id}`, { method: "DELETE" })

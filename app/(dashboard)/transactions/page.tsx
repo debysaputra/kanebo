@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import Modal from "@/components/Modal"
 import { useToast } from "@/components/Toast"
+import { useConfirm } from "@/components/ConfirmDialog"
 import { format } from "date-fns"
 import { id as idLocale } from "date-fns/locale"
 
@@ -87,6 +88,7 @@ export default function TransactionsPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const { toast } = useToast()
+  const { confirm } = useConfirm()
 
   const fetchTransactions = useCallback(async () => {
     setLoading(true)
@@ -209,7 +211,8 @@ export default function TransactionsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Hapus transaksi ini?")) return
+    const ok = await confirm({ title: "Hapus Transaksi", message: "Transaksi ini akan dihapus dan saldo akun akan dikembalikan. Lanjutkan?", confirmText: "Hapus" })
+    if (!ok) return
     setDeleting(id)
     try {
       await fetch(`/api/transactions/${id}`, { method: "DELETE" })

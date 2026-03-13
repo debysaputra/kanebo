@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Plus, Edit2, Trash2, Target, Loader2, AlertTriangle, CheckCircle } from "lucide-react"
 import Modal from "@/components/Modal"
 import { useToast } from "@/components/Toast"
+import { useConfirm } from "@/components/ConfirmDialog"
 
 interface Budget {
   _id: string
@@ -61,6 +62,7 @@ export default function BudgetsPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const { toast } = useToast()
+  const { confirm } = useConfirm()
 
   useEffect(() => {
     fetchBudgets()
@@ -152,7 +154,8 @@ export default function BudgetsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Hapus anggaran ini?")) return
+    const ok = await confirm({ title: "Hapus Anggaran", message: "Anggaran ini akan dihapus permanen. Lanjutkan?", confirmText: "Hapus" })
+    if (!ok) return
     setDeleting(id)
     try {
       await fetch(`/api/budgets/${id}`, { method: "DELETE" })

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Plus, Edit2, Trash2, Tag, Loader2, Lock } from "lucide-react"
 import Modal from "@/components/Modal"
 import { useToast } from "@/components/Toast"
+import { useConfirm } from "@/components/ConfirmDialog"
 
 interface Category {
   _id: string
@@ -44,6 +45,7 @@ export default function CategoriesPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const { toast } = useToast()
+  const { confirm } = useConfirm()
 
   useEffect(() => {
     fetchCategories()
@@ -111,7 +113,8 @@ export default function CategoriesPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Hapus kategori ini?")) return
+    const ok = await confirm({ title: "Hapus Kategori", message: "Kategori ini akan dihapus permanen. Lanjutkan?", confirmText: "Hapus" })
+    if (!ok) return
     setDeleting(id)
     try {
       const res = await fetch(`/api/categories/${id}`, { method: "DELETE" })

@@ -46,8 +46,8 @@ export default function AdminPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const { toast } = useToast()
+  const { confirm } = useConfirm()
 
   useEffect(() => {
     if (status === "loading") return
@@ -126,6 +126,8 @@ export default function AdminPage() {
   }
 
   const handleDelete = async (id: string) => {
+    const ok = await confirm({ title: "Hapus User?", message: "User ini akan dihapus permanen beserta semua datanya. Tindakan ini tidak dapat dibatalkan.", confirmText: "Hapus User" })
+    if (!ok) return
     try {
       const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" })
       const data = await res.json()
@@ -265,7 +267,7 @@ export default function AdminPage() {
                         </button>
                         {user._id !== session.user.id && (
                           <button
-                            onClick={() => setDeleteConfirm(user._id)}
+                            onClick={() => handleDelete(user._id)}
                             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Hapus user"
                           >
@@ -386,36 +388,6 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Delete Confirm */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                <Trash2 size={22} className="text-red-600" />
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900">Hapus User?</h3>
-                <p className="text-sm text-gray-500 mt-0.5">Tindakan ini tidak bisa dibatalkan.</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
-              >
-                Batal
-              </button>
-              <button
-                onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-medium transition-colors"
-              >
-                Hapus
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
