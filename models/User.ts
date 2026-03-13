@@ -38,4 +38,8 @@ const UserSchema = new Schema<IUser>(
   }
 )
 
-export default mongoose.models.User || mongoose.model<IUser>("User", UserSchema)
+// Hapus model yang ter-cache agar schema terbaru selalu digunakan
+// (mencegah error "email required" dari schema lama yang masih di-cache)
+delete (mongoose.models as Record<string, unknown>).User
+
+export default mongoose.model<IUser>("User", UserSchema)
