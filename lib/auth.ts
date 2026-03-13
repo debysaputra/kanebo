@@ -50,10 +50,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id
         token.role = (user as { role?: string }).role ?? "user"
+      }
+      // Fallback: jika token lama belum punya role, ambil dari DB
+      if (token.id && !token.role) {
+        await connectDB()
+        const dbUser = await User.findById(token.id).lean() as { role?: string } | null
+        token.role = dbUser?.role ?? "user"
       }
       return token
     },
