@@ -52,16 +52,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig.callbacks,
     async jwt({ token, user }) {
       if (user) {
+        // Login baru — set dari data login
         token.id = user.id
         token.role = (user as { role?: string }).role ?? "user"
         token.username = (user as { username?: string }).username ?? ""
+        return token
       }
-      // Fallback: jika token lama belum punya role, ambil dari DB
-      if (token.id && !token.role) {
+
+      // Setiap request — re-fetch dari DB agar role selalu up to date
+      // (menangani stale session & perubahan role oleh admin)
+      if (token.id) {
         await connectDB()
-        const dbUser = await User.findById(token.id).lean() as { role?: string; username?: string } | null
-        token.role = dbUser?.role ?? "user"
-        token.username = dbUser?.username ?? ""
+        const dbUser = await User.findById(token.id)
+          .lean() as { role?: string; username?: string } | null
+        if (dbUser) {
+          token.role = dbUser.role ?? "user"
+          token.username = dbUser.username ?? ""
+        } else {
+          // User tidak ditemukan di DB — hapus id untuk invalidate session
+          delete token.id
+        }
       }
       return token
     },

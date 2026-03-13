@@ -5,14 +5,12 @@ export const authConfig = {
     signIn: "/login",
   },
   callbacks: {
-    // Dijalankan di Edge (proxy.ts) — tidak boleh pakai DB
     jwt({ token, user }) {
       if (user) {
         token.role = (user as { role?: string }).role ?? "user"
       }
       return token
     },
-    // Diperlukan agar auth.user.role tersedia di authorized callback
     session({ session, token }) {
       session.user.role = (token.role as string) ?? "user"
       return session
@@ -22,16 +20,17 @@ export const authConfig = {
       const pathname = nextUrl.pathname
 
       const isAuthPage = pathname.startsWith("/login")
-      const isApiAuth = pathname.startsWith("/api/auth")
-      const isAdminRoute =
-        pathname.startsWith("/admin") || pathname.startsWith("/api/admin")
+      const isApiRoute = pathname.startsWith("/api/")
+      const isAdminPage = pathname === "/admin" || pathname.startsWith("/admin/")
 
-      if (isApiAuth) return true
+      // Biarkan semua API route handle auth sendiri (kembalikan JSON, bukan redirect)
+      if (isApiRoute) return true
+
       if (!isLoggedIn && !isAuthPage) return false
       if (isLoggedIn && isAuthPage) return Response.redirect(new URL("/", nextUrl))
 
-      // Blokir akses admin untuk non-admin
-      if (isAdminRoute && auth?.user?.role !== "admin") {
+      // Guard halaman /admin — non-admin redirect ke home
+      if (isAdminPage && auth?.user?.role !== "admin") {
         return Response.redirect(new URL("/", nextUrl))
       }
 
