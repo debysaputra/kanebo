@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Plus, Edit2, Trash2, TrendingUp, Loader2, CheckCircle, Clock } from "lucide-react"
 import Modal from "@/components/Modal"
+import { useToast } from "@/components/Toast"
 import { format, differenceInDays } from "date-fns"
 import { id as idLocale } from "date-fns/locale"
 
@@ -54,6 +55,7 @@ export default function GoalsPage() {
   const [addFundsAmount, setAddFundsAmount] = useState("")
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchGoals()
@@ -141,6 +143,7 @@ export default function GoalsPage() {
 
       await fetchGoals()
       setModalOpen(false)
+      toast(editingGoal ? "Tujuan berhasil diperbarui" : "Tujuan berhasil ditambahkan")
     } catch {
       setError("Terjadi kesalahan")
     } finally {
@@ -173,6 +176,7 @@ export default function GoalsPage() {
       if (res.ok) {
         await fetchGoals()
         setAddFundsModal(false)
+        toast("Dana berhasil ditambahkan")
       }
     } finally {
       setSaving(false)
@@ -185,6 +189,7 @@ export default function GoalsPage() {
     try {
       await fetch(`/api/goals/${id}`, { method: "DELETE" })
       setGoals((prev) => prev.filter((g) => g._id !== id))
+      toast("Tujuan berhasil dihapus")
     } finally {
       setDeleting(null)
     }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Plus, Edit2, Trash2, Tag, Loader2, Lock } from "lucide-react"
 import Modal from "@/components/Modal"
+import { useToast } from "@/components/Toast"
 
 interface Category {
   _id: string
@@ -42,6 +43,7 @@ export default function CategoriesPage() {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchCategories()
@@ -100,6 +102,7 @@ export default function CategoriesPage() {
 
       await fetchCategories()
       setModalOpen(false)
+      toast(editingCat ? "Kategori berhasil diperbarui" : "Kategori berhasil ditambahkan")
     } catch {
       setError("Terjadi kesalahan")
     } finally {
@@ -114,10 +117,11 @@ export default function CategoriesPage() {
       const res = await fetch(`/api/categories/${id}`, { method: "DELETE" })
       const data = await res.json()
       if (!res.ok) {
-        alert(data.error)
+        toast(data.error || "Gagal menghapus kategori", "error")
         return
       }
       setCategories((prev) => prev.filter((c) => c._id !== id))
+      toast("Kategori berhasil dihapus")
     } finally {
       setDeleting(null)
     }

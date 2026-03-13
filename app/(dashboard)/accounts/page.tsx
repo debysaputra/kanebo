@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Plus, Edit2, Trash2, Wallet, Loader2, CreditCard, Smartphone, Banknote } from "lucide-react"
 import Modal from "@/components/Modal"
+import { useToast } from "@/components/Toast"
 
 interface Account {
   _id: string
@@ -59,6 +60,7 @@ export default function AccountsPage() {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchAccounts()
@@ -131,6 +133,7 @@ export default function AccountsPage() {
 
       await fetchAccounts()
       setModalOpen(false)
+      toast(editingAccount ? "Akun berhasil diperbarui" : "Akun berhasil ditambahkan")
     } catch {
       setError("Terjadi kesalahan")
     } finally {
@@ -144,6 +147,7 @@ export default function AccountsPage() {
     try {
       await fetch(`/api/accounts/${id}`, { method: "DELETE" })
       setAccounts((prev) => prev.filter((a) => a._id !== id))
+      toast("Akun berhasil dihapus")
     } finally {
       setDeleting(null)
     }

@@ -6,6 +6,7 @@ import {
   ChevronDown, CheckCircle2, Clock, CircleDot,
 } from "lucide-react"
 import Modal from "@/components/Modal"
+import { useToast } from "@/components/Toast"
 import { format, differenceInDays } from "date-fns"
 import { id as idLocale } from "date-fns/locale"
 
@@ -63,6 +64,7 @@ export default function DebtsPage() {
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [error, setError] = useState("")
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchDebts()
@@ -157,6 +159,7 @@ export default function DebtsPage() {
 
       await fetchDebts()
       setModalOpen(false)
+      toast(editingDebt ? "Data berhasil diperbarui" : "Catatan berhasil ditambahkan")
     } catch {
       setError("Terjadi kesalahan")
     } finally {
@@ -194,6 +197,7 @@ export default function DebtsPage() {
       if (res.ok) {
         await fetchDebts()
         setPayModalOpen(false)
+        toast(newStatus === "paid" ? "Lunas! Pembayaran berhasil dicatat" : "Pembayaran berhasil dicatat")
       }
     } finally {
       setSaving(false)
@@ -206,6 +210,7 @@ export default function DebtsPage() {
     try {
       await fetch(`/api/debts/${id}`, { method: "DELETE" })
       setDebts((prev) => prev.filter((d) => d._id !== id))
+      toast("Catatan berhasil dihapus")
     } finally {
       setDeleting(null)
     }

@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import Modal from "@/components/Modal"
+import { useToast } from "@/components/Toast"
 import { format } from "date-fns"
 import { id as idLocale } from "date-fns/locale"
 
@@ -85,6 +86,7 @@ export default function TransactionsPage() {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+  const { toast } = useToast()
 
   const fetchTransactions = useCallback(async () => {
     setLoading(true)
@@ -198,6 +200,7 @@ export default function TransactionsPage() {
 
       setModalOpen(false)
       fetchTransactions()
+      toast(editingTx ? "Transaksi berhasil diperbarui" : "Transaksi berhasil ditambahkan")
     } catch {
       setError("Terjadi kesalahan")
     } finally {
@@ -211,6 +214,7 @@ export default function TransactionsPage() {
     try {
       await fetch(`/api/transactions/${id}`, { method: "DELETE" })
       fetchTransactions()
+      toast("Transaksi berhasil dihapus")
     } finally {
       setDeleting(null)
     }

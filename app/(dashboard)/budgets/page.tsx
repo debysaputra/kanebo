@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Plus, Edit2, Trash2, Target, Loader2, AlertTriangle, CheckCircle } from "lucide-react"
 import Modal from "@/components/Modal"
+import { useToast } from "@/components/Toast"
 
 interface Budget {
   _id: string
@@ -59,6 +60,7 @@ export default function BudgetsPage() {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchBudgets()
@@ -141,6 +143,7 @@ export default function BudgetsPage() {
 
       await fetchBudgets()
       setModalOpen(false)
+      toast(editingBudget ? "Anggaran berhasil diperbarui" : "Anggaran berhasil ditambahkan")
     } catch {
       setError("Terjadi kesalahan")
     } finally {
@@ -154,6 +157,7 @@ export default function BudgetsPage() {
     try {
       await fetch(`/api/budgets/${id}`, { method: "DELETE" })
       setBudgets((prev) => prev.filter((b) => b._id !== id))
+      toast("Anggaran berhasil dihapus")
     } finally {
       setDeleting(null)
     }

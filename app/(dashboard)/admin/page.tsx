@@ -14,6 +14,7 @@ import {
   EyeOff,
   Search,
 } from "lucide-react"
+import { useToast } from "@/components/Toast"
 
 interface UserData {
   _id: string
@@ -46,6 +47,7 @@ export default function AdminPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
     if (status === "loading") return
@@ -115,6 +117,7 @@ export default function AdminPage() {
 
       closeModal()
       fetchUsers()
+      toast(editUser ? "User berhasil diperbarui" : "User berhasil dibuat")
     } catch {
       setError("Terjadi kesalahan server")
     } finally {
@@ -127,13 +130,14 @@ export default function AdminPage() {
       const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" })
       const data = await res.json()
       if (!res.ok) {
-        alert(data.error || "Gagal menghapus user")
+        toast(data.error || "Gagal menghapus user", "error")
         return
       }
       setDeleteConfirm(null)
       fetchUsers()
+      toast("User berhasil dihapus")
     } catch {
-      alert("Terjadi kesalahan server")
+      toast("Terjadi kesalahan server", "error")
     }
   }
 
