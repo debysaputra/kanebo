@@ -3,28 +3,27 @@
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { Eye, EyeOff, LogIn, Loader2 } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleLogin = async (loginEmail: string, loginPassword: string) => {
+  const handleLogin = async (loginUsername: string, loginPassword: string) => {
     setLoading(true)
     setError("")
     try {
       const result = await signIn("credentials", {
-        email: loginEmail,
+        username: loginUsername,
         password: loginPassword,
         redirect: false,
       })
       if (result?.error) {
-        setError("Email atau password salah")
+        setError("Username atau password salah")
       } else {
         router.push("/")
         router.refresh()
@@ -38,10 +37,10 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await handleLogin(email, password)
+    await handleLogin(username, password)
   }
 
-  const handleDemo = () => handleLogin("demo@kanebo.com", "demo123")
+  const handleDemo = () => handleLogin("demo", "demo123")
 
   return (
     <div>
@@ -56,14 +55,15 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
+            autoComplete="username"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-            placeholder="nama@email.com"
+            placeholder="Masukkan username"
           />
         </div>
 
@@ -75,6 +75,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-12"
               placeholder="••••••••"
             />
@@ -126,7 +127,7 @@ export default function LoginPage() {
         Masuk sebagai Demo
       </button>
       <p className="text-center text-xs text-gray-400 mt-2">
-        demo@kanebo.com · demo123
+        username: demo · password: demo123
       </p>
 
       <p className="text-center text-xs text-gray-400 mt-5">

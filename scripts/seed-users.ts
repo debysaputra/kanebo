@@ -1,8 +1,8 @@
 /**
- * Script untuk membuat data awal: 1 admin + 4 test users
+ * Script untuk membuat data awal: 1 admin + 1 demo + 4 test users
  *
  * Cara jalankan:
- *   npx tsx scripts/seed-users.ts
+ *   pnpm seed
  *
  * Pastikan .env.local berisi MONGODB_URI yang benar.
  */
@@ -20,11 +20,11 @@ if (!MONGODB_URI) {
   process.exit(1)
 }
 
-// ---- Schema definitions (inline agar tidak perlu import dari project) ----
+// ---- Schema definitions ----
 
 const UserSchema = new mongoose.Schema(
   {
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    username: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
     name: { type: String, required: true, trim: true },
     role: { type: String, enum: ["user", "admin"], default: "user" },
@@ -66,45 +66,12 @@ const defaultCategories = [
 ]
 
 const usersToSeed = [
-  // Admin
-  {
-    name: "Admin Kanebo",
-    email: "admin@kanebo.com",
-    password: "admin123",
-    role: "admin",
-  },
-  // Demo
-  {
-    name: "Demo User",
-    email: "demo@kanebo.com",
-    password: "demo123",
-    role: "user",
-  },
-  // Test users
-  {
-    name: "Budi Santoso",
-    email: "budi@test.com",
-    password: "password123",
-    role: "user",
-  },
-  {
-    name: "Siti Rahayu",
-    email: "siti@test.com",
-    password: "password123",
-    role: "user",
-  },
-  {
-    name: "Andi Pratama",
-    email: "andi@test.com",
-    password: "password123",
-    role: "user",
-  },
-  {
-    name: "Dewi Lestari",
-    email: "dewi@test.com",
-    password: "password123",
-    role: "user",
-  },
+  { name: "Admin Kanebo", username: "admin",  password: "admin123",   role: "admin" },
+  { name: "Demo User",    username: "demo",   password: "demo123",    role: "user"  },
+  { name: "Budi Santoso", username: "budi",   password: "password123", role: "user" },
+  { name: "Siti Rahayu",  username: "siti",   password: "password123", role: "user" },
+  { name: "Andi Pratama", username: "andi",   password: "password123", role: "user" },
+  { name: "Dewi Lestari", username: "dewi",   password: "password123", role: "user" },
 ]
 
 // ---- Main ----
@@ -118,20 +85,20 @@ async function seed() {
   let skipped = 0
 
   for (const userData of usersToSeed) {
-    let user = await UserModel.findOne({ email: userData.email })
+    let user = await UserModel.findOne({ username: userData.username })
 
     if (!user) {
       const hashedPassword = await bcrypt.hash(userData.password, 12)
       user = await UserModel.create({
-        email: userData.email,
+        username: userData.username,
         password: hashedPassword,
         name: userData.name,
         role: userData.role,
       })
-      console.log(`✅ Dibuat: ${userData.name} <${userData.email}> [${userData.role}]`)
+      console.log(`✅ Dibuat: ${userData.name} (@${userData.username}) [${userData.role}]`)
       created++
     } else {
-      console.log(`⏩ Skip user: ${userData.email} (sudah ada)`)
+      console.log(`⏩ Skip user: @${userData.username} (sudah ada)`)
       skipped++
     }
 
@@ -148,12 +115,12 @@ async function seed() {
 
   console.log(`\n📊 Selesai: ${created} dibuat, ${skipped} dilewati`)
   console.log("\n🔑 Akun yang tersedia:")
-  console.log("  ADMIN  → admin@kanebo.com   / admin123")
-  console.log("  DEMO   → demo@kanebo.com    / demo123")
-  console.log("  USER   → budi@test.com      / password123")
-  console.log("  USER   → siti@test.com      / password123")
-  console.log("  USER   → andi@test.com      / password123")
-  console.log("  USER   → dewi@test.com      / password123")
+  console.log("  ADMIN  → @admin  / admin123")
+  console.log("  DEMO   → @demo   / demo123")
+  console.log("  USER   → @budi   / password123")
+  console.log("  USER   → @siti   / password123")
+  console.log("  USER   → @andi   / password123")
+  console.log("  USER   → @dewi   / password123")
 
   await mongoose.disconnect()
   console.log("\n🔌 Disconnected. Done!")

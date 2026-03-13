@@ -37,7 +37,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
   try {
     const { id } = await params
-    const { name, email, role, password } = await request.json()
+    const { name, username, role, password } = await request.json()
 
     await connectDB()
 
@@ -45,7 +45,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (!user) return NextResponse.json({ error: "User tidak ditemukan" }, { status: 404 })
 
     if (name) user.name = name
-    if (email) user.email = email.toLowerCase()
+    if (username) {
+      const conflict = await User.findOne({ username: username.toLowerCase(), _id: { $ne: id } })
+      if (conflict) return NextResponse.json({ error: "Username sudah digunakan" }, { status: 400 })
+      user.username = username.toLowerCase()
+    }
     if (role && ["user", "admin"].includes(role)) user.role = role
     if (password) {
       if (password.length < 6) {
@@ -55,7 +59,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     await user.save()
-
     return NextResponse.json({ message: "User berhasil diupdate" })
   } catch (error) {
     console.error("Admin update user error:", error)
@@ -78,13 +81,11 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     const user = await User.findById(id)
     if (!user) return NextResponse.json({ error: "User tidak ditemukan" }, { status: 404 })
 
-    // Prevent self-deletion
     if (user._id.toString() === session.user.id) {
       return NextResponse.json({ error: "Tidak dapat menghapus akun sendiri" }, { status: 400 })
     }
 
     await User.findByIdAndDelete(id)
-
     return NextResponse.json({ message: "User berhasil dihapus" })
   } catch (error) {
     console.error("Admin delete user error:", error)

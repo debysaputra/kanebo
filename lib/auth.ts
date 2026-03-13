@@ -10,17 +10,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.username || !credentials?.password) {
           return null
         }
 
         try {
           await connectDB()
-          const user = await User.findOne({ email: credentials.email }).select("+password")
+          const user = await User.findOne({ username: credentials.username }).select("+password")
 
           if (!user) {
             return null
@@ -37,8 +37,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           return {
             id: user._id.toString(),
-            email: user.email,
             name: user.name,
+            username: user.username,
             role: user.role,
           }
         } catch (error) {
@@ -54,12 +54,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id
         token.role = (user as { role?: string }).role ?? "user"
+        token.username = (user as { username?: string }).username ?? ""
       }
       // Fallback: jika token lama belum punya role, ambil dari DB
       if (token.id && !token.role) {
         await connectDB()
-        const dbUser = await User.findById(token.id).lean() as { role?: string } | null
+        const dbUser = await User.findById(token.id).lean() as { role?: string; username?: string } | null
         token.role = dbUser?.role ?? "user"
+        token.username = dbUser?.username ?? ""
       }
       return token
     },
@@ -67,6 +69,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.id) {
         session.user.id = token.id as string
         session.user.role = (token.role as string) ?? "user"
+        session.user.username = (token.username as string) ?? ""
       }
       return session
     },

@@ -51,10 +51,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { email, password, name, role = "user" } = await request.json()
+    const { username, password, name, role = "user" } = await request.json()
 
-    if (!email || !password || !name) {
-      return NextResponse.json({ error: "Email, password, dan nama wajib diisi" }, { status: 400 })
+    if (!username || !password || !name) {
+      return NextResponse.json({ error: "Username, password, dan nama wajib diisi" }, { status: 400 })
     }
 
     if (password.length < 6) {
@@ -67,15 +67,14 @@ export async function POST(request: NextRequest) {
 
     await connectDB()
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() })
+    const existingUser = await User.findOne({ username: username.toLowerCase() })
     if (existingUser) {
-      return NextResponse.json({ error: "Email sudah terdaftar" }, { status: 400 })
+      return NextResponse.json({ error: "Username sudah digunakan" }, { status: 400 })
     }
 
     const hashedPassword = await bcrypt.hash(password, 12)
-    const user = await User.create({ email: email.toLowerCase(), password: hashedPassword, name, role })
+    const user = await User.create({ username: username.toLowerCase(), password: hashedPassword, name, role })
 
-    // Seed default categories for new user
     const categoriesWithUserId = defaultCategories.map((cat) => ({ ...cat, userId: user._id }))
     await Category.insertMany(categoriesWithUserId)
 

@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import {
-  Users,
   Plus,
   Pencil,
   Trash2,
@@ -19,19 +18,19 @@ import {
 interface UserData {
   _id: string
   name: string
-  email: string
+  username: string
   role: "user" | "admin"
   createdAt: string
 }
 
 interface UserFormData {
   name: string
-  email: string
+  username: string
   password: string
   role: "user" | "admin"
 }
 
-const emptyForm: UserFormData = { name: "", email: "", password: "", role: "user" }
+const emptyForm: UserFormData = { name: "", username: "", password: "", role: "user" }
 
 export default function AdminPage() {
   const { data: session, status } = useSession()
@@ -80,7 +79,7 @@ export default function AdminPage() {
 
   const openEdit = (user: UserData) => {
     setEditUser(user)
-    setForm({ name: user.name, email: user.email, password: "", role: user.role })
+    setForm({ name: user.name, username: user.username, password: "", role: user.role })
     setError("")
     setShowModal(true)
   }
@@ -96,7 +95,7 @@ export default function AdminPage() {
     setError("")
 
     try {
-      const body: Partial<UserFormData> = { name: form.name, email: form.email, role: form.role }
+      const body: Partial<UserFormData> = { name: form.name, username: form.username, role: form.role }
       if (!editUser || form.password) body.password = form.password
 
       const url = editUser ? `/api/admin/users/${editUser._id}` : "/api/admin/users"
@@ -141,7 +140,7 @@ export default function AdminPage() {
   const filteredUsers = users.filter(
     (u) =>
       u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase())
+      u.username.toLowerCase().includes(search.toLowerCase())
   )
 
   if (status === "loading" || loading) {
@@ -176,7 +175,7 @@ export default function AdminPage() {
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
-          placeholder="Cari nama atau email..."
+          placeholder="Cari nama atau username..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -222,7 +221,7 @@ export default function AdminPage() {
                         </div>
                         <div>
                           <p className="font-medium text-gray-900 text-sm">{user.name}</p>
-                          <p className="text-xs text-gray-500">{user.email}</p>
+                          <p className="text-xs text-gray-500">@{user.username}</p>
                         </div>
                       </div>
                     </td>
@@ -295,7 +294,7 @@ export default function AdminPage() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Nama</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Nama Lengkap</label>
                 <input
                   type="text"
                   value={form.name}
@@ -307,20 +306,24 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="email@contoh.com"
-                  required
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Username</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">@</span>
+                  <input
+                    type="text"
+                    value={form.username}
+                    onChange={(e) => setForm({ ...form, username: e.target.value.toLowerCase().replace(/\s/g, "") })}
+                    placeholder="username"
+                    required
+                    className="w-full pl-8 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Password {editUser && <span className="text-gray-400 font-normal">(kosongkan jika tidak diubah)</span>}
+                  Password{" "}
+                  {editUser && <span className="text-gray-400 font-normal">(kosongkan jika tidak diubah)</span>}
                 </label>
                 <div className="relative">
                   <input
@@ -374,7 +377,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Delete Confirm Modal */}
+      {/* Delete Confirm */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl p-6">
@@ -384,9 +387,7 @@ export default function AdminPage() {
               </div>
               <div>
                 <h3 className="font-bold text-gray-900">Hapus User?</h3>
-                <p className="text-sm text-gray-500 mt-0.5">
-                  Tindakan ini tidak bisa dibatalkan.
-                </p>
+                <p className="text-sm text-gray-500 mt-0.5">Tindakan ini tidak bisa dibatalkan.</p>
               </div>
             </div>
             <div className="flex gap-3">
