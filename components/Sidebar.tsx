@@ -11,6 +11,7 @@ import {
   Target,
   BarChart3,
   TrendingUp,
+  HandCoins,
   X,
   ShieldCheck,
 } from "lucide-react"
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/budgets", icon: Target, label: "Anggaran" },
   { href: "/reports", icon: BarChart3, label: "Laporan" },
   { href: "/goals", icon: TrendingUp, label: "Tujuan" },
+  { href: "/debts", icon: HandCoins, label: "Hutang & Piutang" },
 ]
 
 interface SidebarProps {
