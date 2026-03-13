@@ -42,7 +42,7 @@ export default function Header({ onMenuClick, title }: HeaderProps) {
               <p className="text-sm font-semibold text-gray-800 leading-none">
                 {session?.user?.name || "User"}
               </p>
-              <p className="text-xs text-gray-500">{session?.user?.email}</p>
+              <p className="text-xs text-gray-500">@{session?.user?.username}</p>
             </div>
           </button>
 
@@ -55,7 +55,7 @@ export default function Header({ onMenuClick, title }: HeaderProps) {
               <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 z-20 overflow-hidden">
                 <div className="p-3 border-b border-gray-100">
                   <p className="text-sm font-semibold text-gray-800">{session?.user?.name}</p>
-                  <p className="text-xs text-gray-500 truncate">{session?.user?.email}</p>
+                  <p className="text-xs text-gray-500 truncate">@{session?.user?.username}</p>
                 </div>
                 <button
                   onClick={() => {
