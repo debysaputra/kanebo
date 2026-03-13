@@ -44,21 +44,31 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const user = await User.findById(id)
     if (!user) return NextResponse.json({ error: "User tidak ditemukan" }, { status: 404 })
 
-    if (name) user.name = name
-    if (username) {
-      const conflict = await User.findOne({ username: username.toLowerCase(), _id: { $ne: id } })
-      if (conflict) return NextResponse.json({ error: "Username sudah digunakan" }, { status: 400 })
-      user.username = username.toLowerCase()
-    }
-    if (role && ["user", "admin"].includes(role)) user.role = role
-    if (password) {
-      if (password.length < 6) {
-        return NextResponse.json({ error: "Password minimal 6 karakter" }, { status: 400 })
-      }
-      user.password = await bcrypt.hash(password, 12)
+    // Validasi password jika diisi
+    if (password && password.length < 6) {
+      return NextResponse.json({ error: "Password minimal 6 karakter" }, { status: 400 })
     }
 
-    await user.save()
+    // Cek konflik username
+    if (username) {
+      const conflict = await User.findOne({
+        username: username.toLowerCase(),
+        _id: { $ne: id },
+      })
+      if (conflict) {
+        return NextResponse.json({ error: "Username sudah digunakan" }, { status: 400 })
+      }
+    }
+
+    // Bangun objek update — hindari select:false issue dengan $set langsung
+    const updateFields: Record<string, string> = {}
+    if (name) updateFields.name = name
+    if (username) updateFields.username = username.toLowerCase()
+    if (role && ["user", "admin"].includes(role)) updateFields.role = role
+    if (password) updateFields.password = await bcrypt.hash(password, 12)
+
+    await User.findByIdAndUpdate(id, { $set: updateFields })
+
     return NextResponse.json({ message: "User berhasil diupdate" })
   } catch (error) {
     console.error("Admin update user error:", error)
