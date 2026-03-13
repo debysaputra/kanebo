@@ -189,7 +189,10 @@ export default function AdminPage() {
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-6 py-4">
-                  User
+                  Nama
+                </th>
+                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-6 py-4">
+                  Username
                 </th>
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-6 py-4">
                   Role
@@ -205,7 +208,7 @@ export default function AdminPage() {
             <tbody className="divide-y divide-gray-50">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="text-center py-12 text-gray-400 text-sm">
+                  <td colSpan={5} className="text-center py-12 text-gray-400 text-sm">
                     {search ? "Tidak ada user yang cocok" : "Belum ada user"}
                   </td>
                 </tr>
@@ -219,11 +222,13 @@ export default function AdminPage() {
                             {user.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-900 text-sm">{user.name}</p>
-                          <p className="text-xs text-gray-500">@{user.username}</p>
-                        </div>
+                        <p className="font-medium text-gray-900 text-sm">{user.name}</p>
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center gap-1 text-sm text-gray-700 font-mono bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-200">
+                        @{user.username}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       {user.role === "admin" ? (
